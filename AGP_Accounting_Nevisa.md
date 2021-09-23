@@ -261,7 +261,11 @@ Response (200):
             'usage_remained': 0,
             'num_service_history': 0,
             'has_service': bool,
-        
+            
+            'configuration': {
+                'insert_punctuation': bool,
+            },
+            
             'current_service_record': {
                 'id': "UUID",
                 'start_time': datetime,
@@ -287,6 +291,7 @@ Response (200):
 
 
 
+# 
 # Nevisa
 ## Retrieve All Services
     GET: /nevisa/get_services
@@ -379,6 +384,29 @@ Response (200):
 ----------
 
 
+## Set Configuration
+    PUT: /nevisa/set_config
+
+
+- Header authentication: **required**
+    {'Authorization': "Token <auth-token>"}
+
+Request:
+
+    {
+      'insert_punctuation': bool,
+    }
+
+Response (200):
+
+    {
+      'insert_punctuation': bool,
+    }
+
+
+----------
+
+
 ## Check Account
     POST: /nevisa/check_account
 
@@ -395,8 +423,11 @@ Request:
 Response (200):
 
     {
-      'usage_remained': 10000       # in milliseconds (ms)
-    }
+        'usage_remained': 10000,       // in milliseconds (ms)
+        'configuration': {
+            'insert_punctuation': bool,
+        },
+      }
 
 **NOTE:** The response status code will be **HTTP_401_UNAUTHORIZED** if the token (sent in the header) is not valid; otherwise, the status code will be HTTP_200_OK.
 
