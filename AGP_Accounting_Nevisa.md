@@ -1,6 +1,34 @@
 # AGP_Accounting_Nevisa
 
 # User Account
+
+
+## Signup (for Telegram Bot)
+    POST: /account/signup/telegrambot
+
+Request:
+
+    {
+      'username': "username",         # must be unique
+      'password': "xxxxxxx",
+    }
+
+Response (**201**):
+
+    {
+      'message': "The user successfully signed up.",
+      'user': {
+        'id': "user's UUID",
+        'username': "username",
+        'token': "<auth_token>",
+      }
+    }
+
+**NOTE:** The username must include an English character.
+
+----------
+
+
 ## Signup (Phone Number)
     POST: /account/signup/phone
 
@@ -255,6 +283,7 @@ Response (200):
         'username': "username",
         'phone': "989123456789",
         'email: "xxxxxx@yyyyy.zzz",
+        'is_telegram_user': bool,
       
         'nevisa_service_account': {
             'current_charge': 0,
@@ -290,8 +319,6 @@ Response (200):
 ----------
 
 
-
-# 
 # Nevisa
 ## Retrieve All Services
     GET: /nevisa/get_services
