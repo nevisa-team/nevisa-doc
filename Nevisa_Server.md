@@ -4,10 +4,6 @@
 ## File Recognition
     POST: /recognize-file
 
-
-- Header authentication: **required**
-    {'Authorization': "Token <auth-token>"}
-
 **NOTE:** the request must be in **multipart/form-data** format
 
 Request:

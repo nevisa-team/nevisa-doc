@@ -1,34 +1,6 @@
 # AGP_Accounting_Nevisa
 
 # User Account
-
-
-## Signup (for Telegram Bot)
-    POST: /account/signup/telegrambot
-
-Request:
-
-    {
-      'username': "username",         # must be unique
-      'password': "xxxxxxx",
-    }
-
-Response (**201**):
-
-    {
-      'message': "The user successfully signed up.",
-      'user': {
-        'id': "user's UUID",
-        'username': "username",
-        'token': "<auth_token>",
-      }
-    }
-
-**NOTE:** The username must include an English character.
-
-----------
-
-
 ## Signup (Phone Number)
     POST: /account/signup/phone
 
@@ -102,10 +74,14 @@ Response (200):
       'message': "Account is successfully verified.",
       'user': {
           'id': "user's UUID",
+          'token': "user's auth-token",
           'username': "username",
           'phone': "989123456789",
           'email': "xxxxxx@yyyy.zzz",
-          'token': "user's auth-token",
+          'is_staff': bool,
+          'is_telegram_user': bool,
+    
+          'nevisa_service_account': {...}     // like "Retrieve Account"
       }
     }
 
@@ -174,13 +150,17 @@ Request:
 Response (200):
 
     {
-      'message': "Successfully logged in.",
-      'data': {
-        'id': "user's UUID",
-        'username': "username",
-        'phone': "989123456789",
-        'email': "xxxxxx@yyyy.zzz",
-        'token': "User's auth-token",
+        'message': "Successfully logged in.",
+        'user': {
+            'id': "user's UUID",
+            'token': "user's auth-token",
+            'username': "username",
+            'phone': "989123456789",
+            'email': "xxxxxx@yyyy.zzz",
+            'is_staff': bool,
+            'is_telegram_user': bool,
+      
+            'nevisa_service_account': {...}     // like "Retrieve Account"
       }
     }
 
@@ -280,9 +260,11 @@ Response (200):
 
     {
         'id': "user's UUID",
+        'token': "user's auth token",
         'username': "username",
         'phone': "989123456789",
         'email: "xxxxxx@yyyyy.zzz",
+        'is_staff': bool,
         'is_telegram_user': bool,
       
         'nevisa_service_account': {
@@ -292,7 +274,8 @@ Response (200):
             'has_service': bool,
             
             'configuration': {
-                'insert_punctuation': bool,
+                'convert_punctuations': bool,
+                'show_word_confidences': bool,
             },
             
             'current_service_record': {
@@ -335,6 +318,8 @@ Response (200): returns a **list** of all services (packages) available to purch
         'hour_limit': 20,
         'max_users': 2,
         'actual_price': 1000,
+    
+        'is_for_telegram': bool,    # True: the service is for telegram users
       },
       {
         'id': "UUID",
@@ -409,6 +394,46 @@ Response (200):
 
 
 ----------
+## Reserve Service
+    POST: /nevisa/reserve_service
+
+
+- Header authentication: **required**
+    {'Authorization': "Token <auth-token>"}
+
+Request:
+
+    {
+      'service_id': "service's UUID",
+    }
+
+Response (200):
+
+    {
+        'message': "The service is successfully reserved.",    
+    
+        'service_record': {
+            'id': "UUID",
+            'start_time': datetime,
+            'end_time': datetime,
+            
+            'service': {
+                'id': "UUID",
+                'name': "name",
+                'code': 1,
+                'deadline': datetime,
+                'price_per_hour': 1000,
+                'hour_limit': 20,
+                'max_users': 2,
+                'actual_price': 1000,
+            },
+        }
+    }
+
+**NOTE:** if the user’s **doesn’t have an active service** or he **doesn’t have enough charge** in his wallet, a corresponding **error** will be returned.
+
+
+----------
 
 
 ## Set Configuration
@@ -421,13 +446,15 @@ Response (200):
 Request:
 
     {
-      'insert_punctuation': bool,
+      'convert_punctuations': bool,
+      'show_word_confidences': bool,
     }
 
 Response (200):
 
     {
-      'insert_punctuation': bool,
+      'convert_punctuations': bool,
+      'show_word_confidences': bool,
     }
 
 
@@ -450,9 +477,12 @@ Request:
 Response (200):
 
     {
-        'usage_remained': 10000,       // in milliseconds (ms)
+        'usage_remained': 10000,       // ms
+        'has_reserved': bool,          // True: the user has a reserved service
+        'usage_with_reserved': 12000,  // ms: the current usage + reserved usage
         'configuration': {
-            'insert_punctuation': bool,
+            'convert_punctuations': bool,
+            'show_word_confidences': bool,
         },
       }
 
@@ -506,5 +536,3 @@ Response (200):
 **NOTE:** Then,  the user should be redirected to the page where he should pay the price. (Zarinpal) After the payment is done, the user will be redirected to a page where the payment result is shown.
 
 ----------
-
-
