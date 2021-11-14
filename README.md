@@ -1,2 +1,0 @@
-# nevisa-doc
-Nevisa documents
