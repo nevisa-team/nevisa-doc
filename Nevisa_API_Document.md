@@ -1,6 +1,36 @@
 # Nevisa Server
 
-# File Protocol
+## Login
+    POST: /account/login
+
+Request:
+
+    {
+      'username_or_phone_or_email': "uuupppeee", 
+      'password': "xxxxxx",
+    }
+
+Response (200):
+
+    {
+        'message': "Successfully logged in.",
+        'user': {
+            'id': "user's UUID",
+            'token': "user's auth-token",
+            'username': "username",
+            'phone': "989123456789",
+            'email': "xxxxxx@yyyy.zzz",
+            'is_staff': bool,
+            'is_telegram_user': bool,
+      
+            'nevisa_service_account': {...}     // like "Retrieve Account"
+      }
+    }
+
+**NOTE:** The **authentication token** changes every time the user logs in.
+
+----------
+
 ## File Recognition
     POST: /recognize-file
 
