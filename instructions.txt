@@ -1,0 +1,80 @@
+##########################################################################
+### Installations
+
+1. Install postgresql & redis using commands: 
+	a. sudo apt-get update
+	b. sudo apt-get install postgresql postgresql-contrib
+	c. sudo apt install redis-server
+
+2. Make sure python3 version is >= 3.6.
+
+3. Create the accounting database using commands: 
+	a. sudo -i -u postgres
+	b. psql
+	c. CREATE USER accuser WITH PASSWORD 'accpwd';
+	d. CREATE DATABASE agp_accounting_db WITH OWNER accuser;
+	e. get out using 2 'Ctrl+D's.
+
+##########################################################################
+### AGP-Accounting
+
+9. Clone agp-accounting project from: "https://github.com/amirgolpaa24/agp-accounting.git"
+1. Enter the directory 'agp-accounting'
+10. Put the corresponding ".env" file in here.
+
+1. Create a screen using command: 'screen -S agp-accounting'
+
+11. Create a Python3 virtualenv using command: 'python3 -m venv venv'
+12. Enter the virtualenv using command: 'source venv/bin/activate'
+13. Intall the required packages using command: 'pip install -r requirements.txt'
+14. Run command: 'python3 manage.py migrate'
+
+8. Run agp-accounting using command: 'python3 manage.py runserver 127.0.0.1:5081'
+
+15. Get out of the screen ('Ctrl+A', then press 'D') (for entering again: screen -r agp-accounting)
+
+##########################################################################
+### Nevisa-Server
+
+4. Clone nevisa-server project from: "https://github.com/nevisa-team/nevisa-server.git"
+1. Enter the directory 'agp-accounting'
+5. Put the corresponding ".env" file in the main directory.
+
+1. Create a screen using command: 'screen -S nevisa-server'
+
+6. Create a Python3 virtualenv using command: 'python3 -m venv venv'
+7. Enter the virtualenv using command: 'source venv/bin/activate'
+8. Intall the required packages using command: 'pip install -r requirements.txt'
+14. Run commands: 
+	a. python3 manage.py makemigrations
+	b. python3 manage.py migrate
+11. Create an admin user with command: 'python3 manage.py createsuperuser'
+
+8. Run nevisa-server using command: 'daphne -b 127.0.0.1 -p 5051 nevisa.asgi:application'
+
+15. Get out of the screen ('Ctrl+A', then press 'D') (for entering again: screen -r nevisa-server)
+
+##########################################################################
+### Nevisa-Celery
+
+3. cd to the 'nevisa-server' directory
+1. Create a screen using command: 'screen -S nevisa-celery'
+7. Enter the virtualenv using command: 'source venv/bin/activate'
+
+8. Run celery using command: 'celery -A nevisa worker -l INFO'
+
+15. Get out of the screen ('Ctrl+A', then press 'D') (for entering again: screen -r nevisa-celery)
+
+##########################################################################
+### ASR-SERVER (VOSK)
+
+00. Clone agp-asr-server project from: "https://github.com/nevisa-team/agp-asr-server.git"
+1. Enter the directory 'agp-asr-server/agp-asr-server'
+1. Create a screen using command: 'screen -S asr-server'
+7. Enter the virtualenv using command: 'source ../../nevisa-server/venv/bin/activate'
+
+3. Set the model path using command: 'export VOSK_MODEL_PATH='/path/to/VOSKmodel/...'
+8. Run celery using command: 'python3 agp_asr_server.py'
+
+15. Get out of the screen ('Ctrl+A', then press 'D') (for entering again: screen -r asr-server)
+
