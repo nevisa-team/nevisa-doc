@@ -1,7 +1,16 @@
 # Nevisa Server
 
-## Login
+برای استفاده از API های سرور نویسا باید ابتدا در وبسایت [پرشین‌اسپیچ](https://persianspeech.com) ثبت‌نام کرده و حساب کاربری خود را با استفاده از ایمیل یا شماره تلفن خود فعال کنید.
+
+پس از فعالسازی و ورود به حساب کاربری خود، باید حتما یکی از بسته‌های نویسا را برای خود فعال کنید. (می‌توانید برای شروع و تست از بسته‌ی یک ساعته‌ی رایگان استفاده کنید.)
+
+اکنون می‌توانید از API های زیر استفاده کنید.
+کافیست URL هر API را به مقدار https://api.persianspeech.com بچسبانید.
+
+## 1. Login
     POST: /account/login
+
+با استفاده از این API می‌توانید با ارسال نام‌کاربری، ایمیل، یا تلفن خود به همراه رمز عبور حساب کاربری خود، token و api-key خود را دریافت کنید. شما برای استفاده از API های دیگر به این دو مقدار نیاز خواهید داشت.
 
 Request:
 
@@ -23,24 +32,42 @@ Response (200):
             'is_staff': bool,
             'is_telegram_user': bool,
       
-            'nevisa_service_account': {...}     // like "Retrieve Account"
+            'nevisa_service_account': {
+                'current_service_record': {
+                    'key': "your api-key",
+                    ...
+                },
+                ...
+            }
       }
     }
+    
+**auth-token:**
 
-**NOTE:** The **authentication token** changes every time the user logs in.
+    response.data['user']['token']
+
+**api-key:**
+
+    response.data['user']['nevisa_service_account']['current_service_record']['key']
+
+**توجه:** مقدار **authentication token** با هر بار لاگین کردن تغییر می‌کند.
+
+**توجه:** در صورتی که بسته‌ی فعال نداشته باشید، مقدار **current_service_record** برابر **null** خواهد بود.
 
 ----------
 
-## File Recognition
+## 2. File Recognition
     POST: /recognize-file
 
-**NOTE:** the request must be in **multipart/form-data** format
+حال با استفاده از auth-token و api-key خود که از Login دریافت کردید، می‌توانید فایل صوتی خود را (بدون نیاز به تبدیل فرمت فایل) به این API فرستاده و در پاسخ متن حاصل از تبدیل فایل صوتی را دریافت کنید.
+
+**توجه:** فرمت request شما برای این API باید حتما به صورت **multipart/form-data** باشد. در غیر این صورت با خطا مواجه خواهید شد.
 
 Request:
 
     {
-      'auth_token': "user's authentication token",     # take it from accounting
-      'api_key': "user's api-key",                     # take it from accounting
+      'auth_token': "user's authentication token",     # from login API
+      'api_key': "user's api-key",                     # from login API
       'file': <file>,
     }
 
@@ -51,14 +78,18 @@ Response (200):
         'task_id': "task_id",
     }
 
-**NOTE:** send a GET request to the progress_url to see the progression of your speech-to-text conversion task. (you can see the result in detail in )
+**نکته:** می‌توانید با ارسال یک درخواست GET به progress_url میزان پیشرفت یا progress عملیات تبدیل صوت به متن فایل ارسال شده‌ی خود را مشاهده نمایید. برای جزئیات بیشتر به API بعدی (Task Progress) رجوع کنید.
 
 
 ----------
 
 
-## Task Progress
+## 3. Task Progress
     GET: /celery-progress/<task_id>/
+    
+با استفاه از این API می‌توانید با استفاده از progress_url مربوط به task خود که در File Recognition API دریافت کردید، میزان پیشرفت با progress عملیات تبدیل صوت به متن فایل ارسال شده‌ی خود را مشاهده کنید.
+
+همچنین هرگاه مقدار state در پاسخ برابر  SUCCESS شد، می‌توانید متن حاصل از تبدیل فایل صوتی خود را در کلید result پیدا کنید.
 
 Response [**Before the Final Result**]:
 
@@ -99,29 +130,31 @@ Response [**The Final Result**]:
         },
     }
 
+**result:**
+    
+    response.data['result']['transcription']['result'] = لیستی از تمام کلمات تشخیص داده شده به همراه زمان دقیق شروع و پایان بیان هر کلمه در فایل صوتی و میزان اطمینان مدل از تشخیص هر کلمه
 
-**NOTE:** send a GET request to the progress_url to see the progression of your speech-to-text conversion task. (you can see the result in detail in )
+    response.data['result']['transcription']['text'] = متن نهایی
 
 
 ----------
 
 
-## Terminate Task
+## 4. Terminate Task
     POST: /file/terminate-task
 
+با استفاده از این API می‌توانید عملیات تبدیل صوتی خود را لغو کنید. برای این کار نیاز به مقدار task_id دارید که از پاسخ File Recognition API دریافت کردید.
 
-- Header authentication: **required**
+همچنین، برای این API باید مقدار auth-token خود را به شکل زیر در **header** درخواست خود قرار دهید:
+
     {'Authorization': "Token <auth-token>"}
-
-**NOTE:** the request must be in **multipart/form-data** format
 
 Request:
 
     {
-      'auth_token': "user's authentication token",     # take it from accounting
-      'api_key': "user's api-key",                     # take it from accounting
-      'task_id': "task_id",
+        'auth_token': "user's authentication token",     # from login API
+        'api_key': "user's api-key",                     # from login API
+        'task_id': "task_id",
     }
 
-**NOTE:** if the task does not belong to the user, a **401 error** will be returned. otherwise, response will contain a **200** status code.
-
+در صورتی که تسک با موفقیت لغو شود، پاسخ شامل کد status = 200 خواهد بود.
