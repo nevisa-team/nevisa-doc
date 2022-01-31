@@ -5,10 +5,9 @@
 پس از فعالسازی و ورود به حساب کاربری خود، باید حتما یکی از بسته‌های نویسا را برای خود فعال کنید. (می‌توانید برای شروع و تست از بسته‌ی یک ساعته‌ی رایگان استفاده کنید.)
 
 اکنون می‌توانید از API های زیر استفاده کنید.
-کافیست URL هر API را به مقدار https://api.persianspeech.com بچسبانید.
 
 ## 1. Login
-    POST: /account/login
+    POST: https://accounting.persianspeech.com/account/login
 
 با استفاده از این API می‌توانید با ارسال نام‌کاربری، ایمیل، یا تلفن خود به همراه رمز عبور حساب کاربری خود، token و api-key خود را دریافت کنید. شما برای استفاده از API های دیگر به این دو مقدار نیاز خواهید داشت.
 
@@ -57,7 +56,7 @@ Response (200):
 ----------
 
 ## 2. File Recognition
-    POST: /recognize-file
+    POST: https://api.persianspeech.com/recognize-file
 
 حال با استفاده از auth-token و api-key خود که از Login دریافت کردید، می‌توانید فایل صوتی خود را (بدون نیاز به تبدیل فرمت فایل) به این API فرستاده و در پاسخ متن حاصل از تبدیل فایل صوتی را دریافت کنید.
 
@@ -85,7 +84,7 @@ Response (200):
 
 
 ## 3. Task Progress
-    GET: /celery-progress/<task_id>/
+    GET: https://api.persianspeech.com/celery-progress/<task_id>/
     
 با استفاه از این API می‌توانید با استفاده از progress_url مربوط به task خود که در File Recognition API دریافت کردید، میزان پیشرفت با progress عملیات تبدیل صوت به متن فایل ارسال شده‌ی خود را مشاهده کنید.
 
@@ -141,7 +140,7 @@ Response [**The Final Result**]:
 
 
 ## 4. Terminate Task
-    POST: /file/terminate-task
+    POST: https://api.persianspeech.com/file/terminate-task
 
 با استفاده از این API می‌توانید عملیات تبدیل صوتی خود را لغو کنید. برای این کار نیاز به مقدار task_id دارید که از پاسخ File Recognition API دریافت کردید.
 
