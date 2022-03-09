@@ -1,0 +1,27 @@
+body {
+    margin: 0;
+}
+
+.container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.content div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.content p {
+    text-align: center;
+    width: 60%;
+}
