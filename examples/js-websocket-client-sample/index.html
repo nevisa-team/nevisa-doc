@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGP Mic</title>
+    <link rel="stylesheet" href="index.css" />
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="mic-wrapper">
+            <!-- PartialResult means as you speak and have lower precision until final result arives -->
+            <p id="partial"></p>
+
+            <button id="start-btn">Start Conversation</button>
+            <button id="stop-btn" disabled>Stop Conversation</button>
+
+            <!-- This is final result -->
+            <p id="result"></p>
+
+            <!-- Html audio for conversation playback -->
+            <div>
+                <audio id="audio" controls></audio>
+            </div>
+        </div>
+    </div>
+
+    <!-- RecordRTC for recording microphone and convert to wav 16k -->
+    <!-- https://github.com/muaz-khan/RecordRTC -->
+    <script src="RecordRTC.js"></script>
+
+    <script>
+        // Websocket connection instance ( enter your api key and auth_token )
+        const socket = new WebSocket('wss://api.persianspeech.com/onlineASR6?Authorization=YOUR_AUTH_TOKEN_HERE&api-key=YOUR_API_KEY_HERE');
+
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const resultText = document.getElementById('result');
+        const partialText = document.getElementById('partial');
+        const audio = document.getElementById('audio');
+
+        let audioRecorder;
+        let stream;
+
+        (async () => {
+            try {
+                // Get microphone stream when page loads ( depends on your usecase )
+                stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true } });
+            } catch (error) {
+                console.log(error);
+            }
+        })();
+
+        startBtn.addEventListener('click', async () => {
+            startBtn.setAttribute('disabled', true);
+            stopBtn.removeAttribute('disabled')
+
+            // config microphone recorder using RecordRTC and send the result to server every 500ms
+            audioRecorder = RecordRTC(stream, {
+                type: 'audio',
+                recorderType: StereoAudioRecorder,
+                desiredSampRate: 16000,
+                numberOfAudioChannels: 1,
+                timeSlice: 500,
+                disableLogs: true,
+
+                ondataavailable: (blob) => {
+                    // send the 500ms chunk of recorded audio
+                    socket.send(blob);
+                }
+            });
+
+            // since stream is open, we just resume microphone
+            stream.getTracks().forEach((track) => {
+                if (track.readyState === 'live' && track.kind === 'audio') {
+                    track.enabled = true;
+
+                    // start recdording here
+                    audioRecorder.startRecording();
+                }
+            });
+        });
+
+        stopBtn.addEventListener('click', () => {
+            startBtn.removeAttribute('disabled');
+            stopBtn.setAttribute('disabled', true)
+
+            // we dont want to terminate the microphone stream, just pause the audio track
+            stream && stream.getTracks().forEach((track) => {
+                if (track.readyState === 'live' && track.kind === 'audio') {
+                    track.enabled = false;
+
+                    // stop recording and set the result to our html5 audio player for playback
+                    audioRecorder.stopRecording(() => {
+                        const audioBlob = audioRecorder.getBlob();
+                        const audioUrl = URL.createObjectURL(audioBlob);
+
+                        audio.setAttribute('src', audioUrl);
+
+                    })
+
+                    // send end of engine session to clear current session after stop, and immediatley request new session
+                    socket.send(JSON.stringify({ subject: 'EOES' }));
+                    socket.send(JSON.stringify({ subject: 'REQ', mode: 'stream-custom-raw', guid: '', engine: '1', 'decoding-info': { 'sample-rate': 16000, 'ref-text': '' } }));
+                }
+            });
+        });
+
+        socket.onmessage = (event) => {
+            // check if we have a valid response
+            let eventJson = event?.data && JSON.parse(event.data);
+
+            if (eventJson) {
+
+                // check the subject of the message
+                switch (eventJson.subject) {
+                    case 'INIT':
+                        // if init, it means server is ready for a new session
+                        console.log('Initiated Successfully...');
+
+                        // we send request for a new session
+                        socket.send(JSON.stringify({ subject: 'REQ', mode: 'stream-custom-raw', guid: '', engine: '1', 'decoding-info': { 'sample-rate': 16000, 'ref-text': '' } }));
+                        break;
+                    case 'REQ-RESPONSE':
+                        // in response for our session request, server returns req-response and it's ready to recieve microphone chunks
+                        // we send start of engine session to start recording
+                        socket.send(JSON.stringify({ subject: 'SOES' }));
+                        break;
+                    case 'SOES-RESPONSE':
+                        // here session is started
+                        console.log('Session Started...');
+                        break;
+                    case 'NO-USAGE-REMAINED':
+                        // if you dont have credit to record microphone
+                        console.log('Your credit has ended...');
+                        stopBtn.click();
+                        break;
+                    default:
+                        break;
+                }
+
+                // check if there is a transcription in response
+                if ('transcription' in eventJson) {
+
+                    // check if transcription partial is available, ( to show in your app in realtime )
+                    if (eventJson.transcription.partial) {
+
+                        partialText.innerText = eventJson.transcription.partial
+
+                    }
+
+                    // check if there is a final result in reponse
+                    if (eventJson.transcription.result) {
+
+                        // clear partial result after 2 seconds ( optional )
+                        setTimeout(() => {
+                            partialText.innerText = "";
+                        }, 2000);
+
+                        // show final result
+                        resultText.innerText += `${eventJson.transcription.text} `;
+
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

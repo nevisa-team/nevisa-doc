@@ -1,0 +1,25 @@
+
+body {
+    margin: 0;
+}
+
+.container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container .mic-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container .mic-wrapper #result {
+    white-space: pre-wrap;
+}
+
+.container .mic-wrapper button {
+    margin-bottom: 20px;
+}
