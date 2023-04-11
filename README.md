@@ -1,4 +1,21 @@
-# Nevisa Server
+# Requirements
+
+pip install requests, keyboard
+
+# FILE_PATH
+مسیر فایل صوتی ورودی
+
+FILE_PATH = 'test.mp4'
+
+# username & password
+
+نام کاربری و پسورد خود را در کد وارد کنید
+
+json_data = {
+    'username_or_phone_or_email': "",   # Your username
+    'password': "",                     # Your password
+}
+
 
 برای استفاده از API های سرور نویسا باید ابتدا در وبسایت [پرشین‌اسپیچ](https://persianspeech.com) ثبت‌نام کرده و حساب کاربری خود را با استفاده از ایمیل یا شماره تلفن خود فعال کنید.
 
