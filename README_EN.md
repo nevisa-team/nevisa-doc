@@ -1,4 +1,4 @@
-To use the APIs of Nevisa server, you need to first sign up on the [PersianSpeech](https://persianspeech.com/) website and activate your account using your email or phone number.
+To use the APIs of Nevisa server, you need to first sign up for the [PersianSpeech](https://persianspeech.com/) website and activate your account using your email or phone number.
 After activating and logging into your account, you must activate one of Nevisa’s packages (you can use the one hour free package to start and test the service)
 
 Now you can use following APIs
@@ -83,13 +83,13 @@ Response (200):
 
 ------------------
 
-## 3. Tast Progress
+## 3. Task Progress
 
 ```
 GET: https://api.persianspeech.com/celery-progress/<task_id>/
 ```
 
-using this API, you can see the progress of the audio to text conversion operation of your uploaded file by using the progress_url of your task which you got in the File Recognition API.
+Using this API, you can see the progress of the audio to text conversion operation of your uploaded file by using the progress_url of your task which you got in the File Recognition API.
 
 Also, when the value of the “**state**” in the response becomes **SUCCESS**, you can find the resulting text from the audio file in the “**result**” key.
 
@@ -145,8 +145,8 @@ response.data['result']['transcription']['text'] = last text
 ```
 POST: https://api.persianspeech.com/file/terminate-task
 ```
-Using this API, you can cancel your audio conversion operation. for this, you need the “**task_id**” value that you got from the response of the File Recognition API.
-Also, for this API, you must place your **auth-token** value in the **header** of your request as follows:
+Using this API, you can cancel your audio conversion operation. For this, you need the “**task_id**” value that you got from the response of the File Recognition API.
+Also, for this API, you must place your **auth-token** value in the **header** of your request as below:
 
 ```
 {'Authorization': "Token <auth-token>"}
